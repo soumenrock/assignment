@@ -11,6 +11,7 @@ TABLE_NAME = os.getenv('TABLE')
 
 def handler(event, context):
     print(event)
+    # Add the meta data to dynamo after s3 event trigger
     if event.get('Records'):
         event_time = event['Records'][0]['eventTime']
         s3_details = event['Records'][0]['s3']
@@ -18,7 +19,7 @@ def handler(event, context):
 
         item = {
             'name': {'S': key.split('.')[0]},  # String primary key
-            'extension': {'S': key.split('.')[-1]},  # String sort key (if your table uses one)
+            'extension': {'S': key.split('.')[-1]},  # String sort key 
             'time': {'S': event_time}
         }
         response = dynamodb.put_item(
@@ -28,12 +29,16 @@ def handler(event, context):
 
         print("PutItem succeeded:", response)
         return response
+
+    # this condition will execute if event source is apigateway
     elif event.get('resource'):
+        # this condition will execute if its a fetch operation from API
         if event['resource'] == '/fetch':
             name = event['headers']['name']
             file_type = event['headers'].get('type')
             search_key = {'name': {'S': name}}
 
+            # this will execute if filetype is passed
             if file_type:
                 search_key['extension'] = {'S': file_type}
 
@@ -44,7 +49,6 @@ def handler(event, context):
 
             if 'Item' in response:
                 print(response)
-                # The item is returned as a dictionary with data types (S, N, etc.)
                 final_response = {
                     'statusCode': 200,
                     'body': json.dumps(response['Item'])
@@ -56,7 +60,7 @@ def handler(event, context):
                     'body': "Not Found"
                 }
             return final_response
-
+        # this condition will execute if delete request sent from api
         elif event['resource'] == '/delete':
             name = event['headers']['name']
             file_type = event['headers'].get('type')
