@@ -1,0 +1,79 @@
+---
+swagger: "2.0"
+info:
+  version: "2025-01-26T18:56:15Z"
+  title: "s3-upload"
+host: "qehdad4zg4.execute-api.ap-south-1.amazonaws.com"
+basePath: "/v1"
+schemes:
+- "https"
+paths:
+  /delete:
+    delete:
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-south-1:637475963569:function:insta-assignment/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+  /fetch:
+    get:
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-south-1:637475963569:function:insta-assignment/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+  /upload/{object}:
+    put:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "object"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::637475963569:role/api-s3-upload"
+        httpMethod: "PUT"
+        uri: "arn:aws:apigateway:ap-south-1:s3:path/insta-bucket-1995/{key}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.key: "method.request.path.object"
+        passthroughBehavior: "when_no_match"
+        type: "aws"
+definitions:
+  Empty:
+    type: "object"
+    title: "Empty Schema"
+x-amazon-apigateway-binary-media-types:
+- "*/*"
